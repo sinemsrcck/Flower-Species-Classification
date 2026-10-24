@@ -1,0 +1,199 @@
+{
+  "num_images": 32,
+  "avg_confidence_ood": 0.302,
+  "avg_confidence_in_distribution": 0.3338,
+  "rows": [
+    {
+      "species": "begonia",
+      "image": "data/ood_samples/begonia/0.jpg",
+      "predicted_known_class": "rose",
+      "confidence": 0.304
+    },
+    {
+      "species": "begonia",
+      "image": "data/ood_samples/begonia/1.jpg",
+      "predicted_known_class": "red ginger",
+      "confidence": 0.2902
+    },
+    {
+      "species": "begonia",
+      "image": "data/ood_samples/begonia/2.jpg",
+      "predicted_known_class": "snapdragon",
+      "confidence": 0.2787
+    },
+    {
+      "species": "begonia",
+      "image": "data/ood_samples/begonia/3.jpg",
+      "predicted_known_class": "moon orchid",
+      "confidence": 0.3185
+    },
+    {
+      "species": "chrysanthemum",
+      "image": "data/ood_samples/chrysanthemum/0.jpg",
+      "predicted_known_class": "mexican aster",
+      "confidence": 0.3385
+    },
+    {
+      "species": "chrysanthemum",
+      "image": "data/ood_samples/chrysanthemum/1.jpg",
+      "predicted_known_class": "oxeye daisy",
+      "confidence": 0.3271
+    },
+    {
+      "species": "chrysanthemum",
+      "image": "data/ood_samples/chrysanthemum/2.jpg",
+      "predicted_known_class": "oxeye daisy",
+      "confidence": 0.2904
+    },
+    {
+      "species": "chrysanthemum",
+      "image": "data/ood_samples/chrysanthemum/3.jpg",
+      "predicted_known_class": "barbeton daisy",
+      "confidence": 0.3072
+    },
+    {
+      "species": "gardenia",
+      "image": "data/ood_samples/gardenia/0.jpg",
+      "predicted_known_class": "giant white arum lily",
+      "confidence": 0.3254
+    },
+    {
+      "species": "gardenia",
+      "image": "data/ood_samples/gardenia/1.jpg",
+      "predicted_known_class": "camellia",
+      "confidence": 0.3358
+    },
+    {
+      "species": "gardenia",
+      "image": "data/ood_samples/gardenia/2.jpg",
+      "predicted_known_class": "magnolia",
+      "confidence": 0.3195
+    },
+    {
+      "species": "gardenia",
+      "image": "data/ood_samples/gardenia/3.jpg",
+      "predicted_known_class": "frangipani",
+      "confidence": 0.3309
+    },
+    {
+      "species": "hydrangea",
+      "image": "data/ood_samples/hydrangea/0.jpg",
+      "predicted_known_class": "bishop of llandaff",
+      "confidence": 0.2065
+    },
+    {
+      "species": "hydrangea",
+      "image": "data/ood_samples/hydrangea/1.jpg",
+      "predicted_known_class": "garden phlox",
+      "confidence": 0.3315
+    },
+    {
+      "species": "hydrangea",
+      "image": "data/ood_samples/hydrangea/2.jpg",
+      "predicted_known_class": "mexican petunia",
+      "confidence": 0.3337
+    },
+    {
+      "species": "hydrangea",
+      "image": "data/ood_samples/hydrangea/3.jpg",
+      "predicted_known_class": "sweet william",
+      "confidence": 0.2965
+    },
+    {
+      "species": "jasmine",
+      "image": "data/ood_samples/jasmine/0.jpg",
+      "predicted_known_class": "gaura",
+      "confidence": 0.3078
+    },
+    {
+      "species": "jasmine",
+      "image": "data/ood_samples/jasmine/1.jpg",
+      "predicted_known_class": "japanese anemone",
+      "confidence": 0.3431
+    },
+    {
+      "species": "jasmine",
+      "image": "data/ood_samples/jasmine/2.jpg",
+      "predicted_known_class": "garden phlox",
+      "confidence": 0.3242
+    },
+    {
+      "species": "jasmine",
+      "image": "data/ood_samples/jasmine/3.jpg",
+      "predicted_known_class": "great masterwort",
+      "confidence": 0.2313
+    },
+    {
+      "species": "lavender",
+      "image": "data/ood_samples/lavender/0.jpg",
+      "predicted_known_class": "balloon flower",
+      "confidence": 0.2814
+    },
+    {
+      "species": "lavender",
+      "image": "data/ood_samples/lavender/1.jpg",
+      "predicted_known_class": "love in the mist",
+      "confidence": 0.2656
+    },
+    {
+      "species": "lavender",
+      "image": "data/ood_samples/lavender/2.jpg",
+      "predicted_known_class": "stemless gentian",
+      "confidence": 0.2534
+    },
+    {
+      "species": "lavender",
+      "image": "data/ood_samples/lavender/3.jpg",
+      "predicted_known_class": "mexican petunia",
+      "confidence": 0.3352
+    },
+    {
+      "species": "peony",
+      "image": "data/ood_samples/peony/0.jpg",
+      "predicted_known_class": "siam tulip",
+      "confidence": 0.3072
+    },
+    {
+      "species": "peony",
+      "image": "data/ood_samples/peony/1.jpg",
+      "predicted_known_class": "windflower",
+      "confidence": 0.3447
+    },
+    {
+      "species": "peony",
+      "image": "data/ood_samples/peony/2.jpg",
+      "predicted_known_class": "lotus lotus",
+      "confidence": 0.2614
+    },
+    {
+      "species": "peony",
+      "image": "data/ood_samples/peony/3.jpg",
+      "predicted_known_class": "siam tulip",
+      "confidence": 0.3104
+    },
+    {
+      "species": "zinnia",
+      "image": "data/ood_samples/zinnia/0.jpg",
+      "predicted_known_class": "pincushion flower",
+      "confidence": 0.2612
+    },
+    {
+      "species": "zinnia",
+      "image": "data/ood_samples/zinnia/1.jpg",
+      "predicted_known_class": "marigold",
+      "confidence": 0.3244
+    },
+    {
+      "species": "zinnia",
+      "image": "data/ood_samples/zinnia/2.jpg",
+      "predicted_known_class": "cautleya spicata",
+      "confidence": 0.2878
+    },
+    {
+      "species": "zinnia",
+      "image": "data/ood_samples/zinnia/3.jpg",
+      "predicted_known_class": "fritillary",
+      "confidence": 0.2904
+    }
+  ]
+}

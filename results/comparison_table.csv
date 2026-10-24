@@ -1,0 +1,2 @@
+model_name,accuracy,inference_ms_per_image,model_size_mb,device
+CLIP-ViT-B/32 (zero-shot),0.6654,28.66,577.08,mps
