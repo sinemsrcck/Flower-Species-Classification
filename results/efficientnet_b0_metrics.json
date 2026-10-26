@@ -1,9 +1,10 @@
 {
   "model_name": "EfficientNet-B0 (fine-tuned)",
-  "accuracy": 0.9792,
-  "inference_ms_per_image": 48.47,
+  "accuracy": 0.9902,
+  "inference_ms_per_image": 41.6,
   "model_size_mb": 16.07,
   "device": "cpu (Colab, 1 thread)",
   "num_test_images": 819,
-  "best_valid_accuracy": 0.9866
+  "best_valid_accuracy": 0.9963,
+  "training": "TrivialAugmentWide + RandomErasing; AdamW lr 1e-3 (stage1) -> 3e-4 cosine (stage2); 5+15 epochs; label smoothing 0.1"
 }
