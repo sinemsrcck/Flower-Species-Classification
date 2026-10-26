@@ -1,0 +1,9 @@
+{
+  "model_name": "EfficientNet-B0 (fine-tuned)",
+  "accuracy": 0.9792,
+  "inference_ms_per_image": 48.47,
+  "model_size_mb": 16.07,
+  "device": "cpu (Colab, 1 thread)",
+  "num_test_images": 819,
+  "best_valid_accuracy": 0.9866
+}
