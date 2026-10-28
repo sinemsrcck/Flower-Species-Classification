@@ -28,9 +28,17 @@ Tüm deneyler `clip.ipynb` ve `generalization_tests.py` içinde yeniden
   jpeg_compression, occlusion) × 5 şiddet seviyesi (1=hafif, 5=şiddetli)
   uygulanarak zero-shot accuracy ölçüldü (bkz. `src/corruptions.py`).
 - **Metrikler:** accuracy, inference hızı (ms/görüntü, batch_size=1, warm-up
-  sonrası ortalama), model boyutu (parametre belleği, MB) —
+  sonrası ortalama, **CPU'da** ölçülür), model boyutu (parametre belleği, MB) —
   `results/clip_metrics.json` şeması diğer takım üyelerinin `evaluate.py`
   çıktısıyla aynıdır, böylece `--task compare` ile otomatik birleştirilebilir.
+- **Yarışma skorlama formülü** (`Flower_Recognition_Competition_Guidelines_v1.pdf`'den):
+  `FINAL SCORE = 0.60×Accuracy(%) + 0.25×Speed_score + 0.15×Size_score`, burada
+  `Speed_score = min(100, Tmax/T × 100)` (Tmax=50 ms, GPU'suz Intel i7 + 16GB RAM
+  üzerinde ölçülecek) ve `Size_score = min(100, Smax/S × 100)` (Smax=35 MB). Bu
+  formül `clip.ipynb` ve `generalization_tests.py --task compare` içinde
+  otomatik hesaplanıyor. **Inference hızı bu yüzden CPU'da ölçüldü** (ilk
+  denemede yanlışlıkla Apple GPU'da (`mps`) ölçülmüştü; bu değer de bilgi
+  amaçlı `inference_ms_per_image_mps` alanında saklanıyor).
 
 ## Sonuçlar
 
@@ -85,24 +93,24 @@ rotasyon/sıkıştırmadan çok daha kritik bir risk faktörü.
 
 ### Ana modellerle karşılaştırma (`results/comparison_table.csv/png`)
 
-| Model | Accuracy | ms/görüntü | Boyut (MB) |
-|---|---|---|---|
-| CLIP-ViT-B/32 (zero-shot) | 0.6654 | ~30-40 (MPS, run'lar arası değişken) | 577.08 |
-| EfficientNet-B0 (1. kişi) | *bekleniyor* | | |
-| MobileNetV3 (2. kişi) | *bekleniyor* | | |
-| EfficientNetV2-S (4. kişi) | *bekleniyor* | | |
+| Model | Accuracy | ms/görüntü (CPU) | Boyut (MB) | Final Score* |
+|---|---|---|---|---|
+| CLIP-ViT-B/32 (zero-shot) | 0.6654 | 84.30 | 577.08 | **55.66** |
+| EfficientNet-B0 (1. kişi, fine-tuned) | 0.9902 | 41.60 | 16.07 | **99.41** |
+| MobileNetV3 (2. kişi) | *bekleniyor* | | | |
+| EfficientNetV2-S (4. kişi) | *bekleniyor* | | | |
+
+\* `FINAL SCORE = 0.60×Accuracy(%) + 0.25×Speed_score + 0.15×Size_score` (Tmax=50ms, Smax=35MB — bkz. Yöntem). EfficientNet-B0 için skor, `efficientnet_b0_metrics.json`'daki accuracy/hız/boyut değerleri kullanılarak aynı formülle elle hesaplandı (dosyada `competition_score` alanı henüz yok).
 
 Diğer takım üyelerinin `results/<model>_metrics.json` dosyaları (aynı şema)
 eklendiğinde, `python generalization_tests.py --task compare` tekrar
 çalıştırılarak tam karşılaştırma tablosu ve grafiği otomatik üretilir.
 
-CLIP'in model boyutu (577 MB), hafif mimarilere (tipik 15-20 MB) kıyasla
-**~30 kat** daha büyük — zero-shot esnekliğinin (sıfır eğitim verisi
-gerektirmemesi) bedeli, boyut ve hız kriterlerinde dezavantaj.
-
-*Not: `inference_ms_per_image` değeri, MPS (Apple Silicon GPU) üzerinde
-run'dan run'a ~10-15 ms değişkenlik gösterebiliyor (sistem yüküne bağlı);
-güncel değer için `results/clip_metrics.json`'a bakın.*
+CLIP'in model boyutu (577 MB), EfficientNet-B0'a (16 MB) kıyasla **~36 kat**
+daha büyük ve hız olarak da ~2x daha yavaş — yarışma formülüyle CLIP sadece
+**55.66/100** alırken EfficientNet-B0 **99.41/100** alıyor. Bu beklenen bir
+sonuç: EfficientNet-B0 bu 102 sınıf için özel olarak fine-tune edildi ve
+hafif bir mimari, CLIP ise hiç eğitilmeden genel amaçlı bir model.
 
 ## Değerlendirme ve Öneriler
 
@@ -120,3 +128,11 @@ güncel değer için `results/clip_metrics.json`'a bakın.*
 4. **Few-shot bulgusu**: çok az etiketli veri olan senaryolarda (k≥2) CLIP
    tabanlı linear probe, hızlı ve ucuz bir alternatif olabilir; ama k=1 ile
    güvenilir değil.
+5. **CLIP, takımın yarışmaya gönderilecek asıl modeli değil**: PDF'deki
+   "students must submit a model that can be loaded and evaluated using the
+   instructor's required interface" kuralı muhtemelen 2. kişinin
+   `predict.py`/final paketine işaret ediyor. CLIP burada bir genelleme/analiz
+   çalışması; yarışma formülüyle puanlandığında (55.66/100) EfficientNet-B0'ın
+   (99.41/100) gerisinde kalması beklenen ve sorunlu olmayan bir sonuç —
+   CLIP'in katkısı accuracy/hız/boyut yarışında değil, genelleme ve
+   dayanıklılık analizinde.

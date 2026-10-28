@@ -1,2 +1,3 @@
-model_name,accuracy,inference_ms_per_image,model_size_mb,device
-CLIP-ViT-B/32 (zero-shot),0.6654,28.66,577.08,mps
+model_name,accuracy,inference_ms_per_image,model_size_mb,device,final_score
+CLIP-ViT-B/32 (zero-shot),0.6654,84.3,577.08,cpu,55.66
+EfficientNet-B0 (fine-tuned),0.9902,41.6,16.07,"cpu (Colab, 1 thread)",
