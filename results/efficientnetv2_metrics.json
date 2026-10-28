@@ -1,0 +1,19 @@
+{
+  "model_name": "EfficientNetV2-S (fine-tuned)",
+  "accuracy": 0.9817,
+  "inference_ms_per_image": 119.62,
+  "model_size_mb": 39.28,
+  "device": "cpu (Colab, 1 thread)",
+  "num_test_images": 819,
+  "best_valid_accuracy": 0.9878,
+  "top5_accuracy": 1.0,
+  "precision_macro": 0.9796,
+  "recall_macro": 0.9825,
+  "f1_macro": 0.9787,
+  "estimated_final_score": 82.7178,
+  "best_hparams": {
+    "lr": 0.001,
+    "batch_size": 32,
+    "optimizer": "adamw"
+  }
+}
