@@ -75,7 +75,7 @@ klasörü) ve `data/cat_to_name.json` oluşur. `data/` git'e eklenmez (`.gitigno
 
 | Üye | Görev | Teslimler |
 |---|---|---|
-| Fatma Zehra Anbar | Ana Model ve Eğitim Altyapısı (EfficientNet-B0, veri hazırlama) | `dataset.py`, `efficientnet.ipynb`, `efficientnet_best.pth` |
+| Fatma Zehra Anbar | Ana Model ve Eğitim Altyapısı (EfficientNet-B0, veri hazırlama) | `dataset.py`, `efficientnet.ipynb`, `checkpoints/efficientnet_b0_final.pth` |
 | Sinem Sarıçiçek | Model Optimizasyonu ve Final Entegrasyon (MobileNetV3-Large) | `mobilenet.ipynb`, `evaluate.py`, `predict.py`, `checkpoints/mobilenetv3_finetuned_best.pth` |
 | İrem Nur Yavuz | Genelleme ve Alternatif Model (CLIP) | `clip.ipynb`, `generalization_tests.py`, `results/` |
 | Zeynep Seray Uğur | Güçlü Model ve Performans Analizi (EfficientNetV2-S) | `efficientnetv2.ipynb`, `metrics.py`, `efficientnetv2_best.pth` |
@@ -90,9 +90,9 @@ Tüm model dosyaları Drive'da da paylaşılıyor (EfficientNetV2-S yalnızca Dr
 | MobileNetV3-Large | [mobilenetv3_finetuned_best.pth](https://drive.google.com/file/d/1sFwhuMuLw__O_Rte330FyNHgeeRk9qsk/view?usp=sharing) | 16.73 MB | %94.87 (valid %96.94) |
 | EfficientNetV2-S | [efficientnetv2_best.pth](https://drive.google.com/file/d/1Pxuz-DyhDthYKstTQ_-KiJXFqRAU5Svq/view?usp=sharing) | 39.28 MB (fp16) | %98.17 |
 
-Final ONNX modeli (`onnx/efficientnet_b0_fp32.onnx`) repoda bulunuyor; `predict.py`
-varsayılan olarak bunu kullanır ve ek indirme gerektirmez. Final B0 modelinin PyTorch
-hali (`checkpoints/efficientnet_b0_final.pth`) ve MobileNetV3 checkpoint'i
+Final model (EfficientNet-B0, PyTorch: `checkpoints/efficientnet_b0_final.pth`) repoda
+bulunuyor; `predict.py` varsayılan olarak bunu kullanır ve ek indirme gerektirmez. Aynı
+modelin ONNX hali (`onnx/efficientnet_b0_fp32.onnx`) ve MobileNetV3 checkpoint'i
 (`checkpoints/mobilenetv3_finetuned_best.pth`) da repoda; Drive linkleri yedek olarak duruyor.
 
 ---
@@ -198,21 +198,26 @@ CPU inference latency, and model size.
 
 | Model | Test Accuracy | CPU Latency | Model Size |
 |---|---:|---:|---:|
-| EfficientNet-B0 | 99.02% | 17.83 ms | 15.78 MiB |
-| MobileNetV3-Large | 94.87% | 9.14 ms | 16.80 MiB |
-| EfficientNetV2-S | 98.17% | 108.59 ms | 77.32 MiB (ONNX fp32); teslim edilen `.pth`: 39.28 MB (fp16) |
+| **EfficientNet-B0 (final, PyTorch)** | **99.02%** | **24.41 ms** ¹ | **16.07 MB** |
+| EfficientNet-B0 (ONNX alternatifi) | 99.02% | 13.31 ms ¹ | 15.78 MiB |
+| MobileNetV3-Large (PyTorch) | 94.87% | 21.42 ms ² | 16.73 MB |
+| EfficientNetV2-S (PyTorch, fp16) | 98.17% | 119.62 ms ³ | 39.28 MB |
 | CLIP ViT-B/32 (zero-shot) | 66.54% | 56.58 ms | 577.08 MB |
 
-Note: Some accuracy values and CLIP CPU latency are teammate-reported.
-CPU benchmarks were not all performed on identical hardware.
+¹ Windows CPU, 1 thread, batch 1, görüntü okuma + ön işlem dahil (30 tekrarın en düşüğü).
+² Aynı Windows bilgisayar, 30 tekrarın ortalaması (MobileNetV3 ONNX: 9.14 ms, 16.80 MiB).
+³ Colab CPU, 1 thread, yalnızca model (ONNX fp32: 108.59 ms, 77.32 MiB).
+
+Note: CPU benchmarks were not all performed on identical hardware.
 
 EfficientNet-B0 was selected as the final inference model
 because of its high accuracy and efficient CPU performance.
 
 ### Final Inference Pipeline
 
-The final prediction pipeline uses ONNX Runtime and supports
-CPU-only inference.
+The final prediction pipeline runs **EfficientNet-B0 with PyTorch on CPU** by default
+(`--model efficientnet_b0_pytorch`). The same model is also available as ONNX
+(`--model efficientnet_b0_onnx`, faster; identical predictions on all 819 test images).
 
 Required files:
 
@@ -222,7 +227,8 @@ Required files:
 - `model_registry.json`
 - `class_to_idx.json`
 - `cat_to_name.json`
-- `onnx/efficientnet_b0_fp32.onnx`
+- `checkpoints/efficientnet_b0_final.pth` (varsayılan, PyTorch)
+- `onnx/efficientnet_b0_fp32.onnx` (isteğe bağlı, ONNX)
 
 Run inference:
 
@@ -237,8 +243,8 @@ python predict.py --image path/to/flower.jpg --top-k 3
 # numarasıysa (ör. test/47/x.jpg) top-1 accuracy de hesaplanır.
 python predict.py --image-dir path/to/images --top-k 1 --output results.json
 
-# Aynı final model, saf PyTorch ile (ONNX Runtime gerektirmez; ONNX ile 819/819 aynı tahmin)
-python predict.py --image path/to/flower.jpg --model efficientnet_b0_pytorch
+# Aynı final model, ONNX Runtime ile (daha hızlı; PyTorch ile 819/819 aynı tahmin)
+python predict.py --image path/to/flower.jpg --model efficientnet_b0_onnx
 
 # Diğer model
 python predict.py --image path/to/flower.jpg --model mobilenetv3_pytorch
@@ -254,8 +260,8 @@ result["predictions"][0]   # {"class_name": "rose", "class_id": "74", "class_ind
 
 - `class_id` veri setindeki klasör numarasıdır (1–102), `class_name` çiçek adıdır.
 - Telefon fotoğraflarındaki EXIF yön bilgisi otomatik uygulanır.
-- ONNX Runtime varsayılan olarak tüm CPU çekirdeklerini kullanır; tek thread ölçüm için
-  `FLOWER_NUM_THREADS=1` ortam değişkeni verilebilir.
+- ONNX modeli seçildiğinde (`--model efficientnet_b0_onnx`) ONNX Runtime tüm CPU
+  çekirdeklerini kullanır; tek thread ölçüm için `FLOWER_NUM_THREADS=1` verilebilir.
 
 ---
 
@@ -283,9 +289,9 @@ eklemesiyle `--task compare` tam karşılaştırma tablosunu otomatik üretir.
 
 **Teslim doğrulama notu:** `requirements.txt`, sıfır bir sanal ortamda
 (`python3 -m venv` + `pip install -r requirements.txt`, Python 3.9.6) baştan
-test edildi. İki sorun bulunup düzeltildi: (1) `onnxruntime==1.31.1` PyPI'de
-hiç yayınlanmamış bir sürümdü, mevcut en güncel uyumlu sürüm olan `1.19.2`'ye
-düzeltildi; (2) conda ortamı aktifken `python3`'ün çok yeni/boş bir Python'a
+test edildi. İki sorun bulunup düzeltildi: (1) `onnxruntime==1.31.1` Python 3.9
+için yayınlanmadığından, 3.9–3.12'nin hepsini destekleyen `1.19.2` sürümüne
+sabitlendi; (2) conda ortamı aktifken `python3`'ün çok yeni/boş bir Python'a
 işaret edip kurulumu bozabileceği görüldü, bu kılavuza yukarıda eklendi.
 Düzeltmeden sonra tüm paketler (`torch`, `torchvision`, `transformers`,
 `onnxruntime`, `scikit-learn` vb.) temiz bir ortamda sorunsuz kuruldu ve
