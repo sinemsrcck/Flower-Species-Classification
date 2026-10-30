@@ -8,5 +8,15 @@
         "preprocessing": "imagenet_resize256_centercrop224",
         "class_mapping": "class_to_idx.json",
         "enabled": true
+    },
+    "mobilenetv3_pytorch": {
+        "architecture": "mobilenet_v3_large",
+        "backend": "pytorch",
+        "checkpoint": "checkpoints/mobilenetv3_finetuned_best.pth",
+        "num_classes": 102,
+        "image_size": 224,
+        "preprocessing": "imagenet_resize256_centercrop224",
+        "class_mapping": "class_to_idx.json",
+        "enabled": true
     }
 }
