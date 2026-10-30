@@ -36,7 +36,7 @@
         "accuracy_source": "teammate-reported zero-shot",
         "cpu_inference_ms": 56.58,
         "cpu_source": "teammate-reported updated CPU benchmark",
-        "model_size_mib": null,
+        "model_size_mib": 577.08,
         "deployment": "PyTorch / HuggingFace"
     }
 ]
