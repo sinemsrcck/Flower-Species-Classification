@@ -3,6 +3,9 @@ Flower species classification competition using PyTorch and transfer learning.
 
 ## Kurulum
 
+> **Python sürümü:** 3.10–3.12 önerilir (`requirements.txt` kurulumu 3.11'de doğrulandı).
+> `torch==2.8.0` Python 3.14 için kurulamıyor.
+
 ```bash
 python3 -m venv venv
 source venv/bin/activate
@@ -83,8 +86,8 @@ CPU inference latency, and model size.
 |---|---:|---:|---:|
 | EfficientNet-B0 | 99.02% | 17.83 ms | 15.78 MiB |
 | MobileNetV3-Large | 94.87% | 9.14 ms | 16.80 MiB |
-| EfficientNetV2-S | 98.17% | 108.59 ms | 77.32 MiB |
-| CLIP ViT-B/32 (zero-shot) | 66.54% | 56.58 ms | Not reported |
+| EfficientNetV2-S | 98.17% | 108.59 ms | 77.32 MiB (ONNX fp32); teslim edilen `.pth`: 39.28 MB (fp16) |
+| CLIP ViT-B/32 (zero-shot) | 66.54% | 56.58 ms | 577.08 MB |
 
 Note: Some accuracy values and CLIP CPU latency are teammate-reported.
 CPU benchmarks were not all performed on identical hardware.
