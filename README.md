@@ -54,7 +54,10 @@ klasörü) ve `data/cat_to_name.json` oluşur. `data/` git'e eklenmez (`.gitigno
 | MobileNetV3-Large | [mobilenetv3_finetuned_best.pth](https://drive.google.com/file/d/1sFwhuMuLw__O_Rte330FyNHgeeRk9qsk/view?usp=sharing) | 16.73 MB | %94.87 (valid %96.94) |
 | EfficientNetV2-S | [efficientnetv2_best.pth](https://drive.google.com/file/d/1Pxuz-DyhDthYKstTQ_-KiJXFqRAU5Svq/view?usp=sharing) | 39.28 MB (fp16) | %98.17 |
 
-Final ONNX modeli (`onnx/efficientnet_b0_fp32.onnx`) repoda bulunuyor.
+Final ONNX modeli (`onnx/efficientnet_b0_fp32.onnx`) repoda bulunuyor; `predict.py`
+varsayılan olarak bunu kullanır ve ek indirme gerektirmez. MobileNetV3'ü
+`predict.py --model mobilenetv3_pytorch` ile çalıştırmak için yukarıdaki dosyayı
+indirip `checkpoints/mobilenetv3_finetuned_best.pth` olarak koyun.
 
 ### 3. Kişi — Genelleme ve Alternatif Model (CLIP)
 
