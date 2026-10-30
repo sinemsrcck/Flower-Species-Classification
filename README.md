@@ -32,6 +32,18 @@ klasörü) ve `data/cat_to_name.json` oluşur. `data/` git'e eklenmez (`.gitigno
 | 3 | Genelleme ve Alternatif Model (CLIP) | `clip.ipynb`, `generalization_tests.py`, `results/` |
 | 4 | Güçlü Model ve Performans Analizi (EfficientNetV2-S) | `efficientnetv2.ipynb`, `metrics.py`, `efficientnetv2_best.pth` |
 
+### Model Dosyaları (Google Drive)
+
+`.pth` dosyaları GitHub'a yüklenmediği için (`.gitignore`) Drive'da paylaşılıyor.
+
+| Model | Dosya | Boyut | Test accuracy |
+|---|---|---|---|
+| EfficientNet-B0 (final model) | [efficientnet_best.pth](https://drive.google.com/file/d/1Ufxp-rc-5xUNwibXHM_1FMGrxyA5Egsw/view) | 16.07 MB | %99.02 |
+| MobileNetV3-Large | [mobilenetv3_finetuned_best.pth](https://drive.google.com/file/d/1sFwhuMuLw__O_Rte330FyNHgeeRk9qsk/view?usp=sharing) | 16.73 MB | %94.87 (valid %96.94) |
+| EfficientNetV2-S | [efficientnetv2_best.pth](https://drive.google.com/file/d/1Pxuz-DyhDthYKstTQ_-KiJXFqRAU5Svq/view?usp=sharing) | 39.28 MB (fp16) | %98.17 |
+
+Final ONNX modeli (`onnx/efficientnet_b0_fp32.onnx`) repoda bulunuyor.
+
 ### 3. Kişi — Genelleme ve Alternatif Model (CLIP)
 
 CLIP (`openai/clip-vit-base-patch32`) ile zero-shot/few-shot sınıflandırma,
