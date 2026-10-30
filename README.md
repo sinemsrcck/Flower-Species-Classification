@@ -3,12 +3,24 @@ Flower species classification competition using PyTorch and transfer learning.
 
 ## Kurulum
 
-> **Python sürümü:** 3.10–3.12 önerilir (`requirements.txt` kurulumu 3.11'de doğrulandı).
-> `torch==2.8.0` Python 3.14 için kurulamıyor.
+> **Python sürümü:** 3.9–3.12 arası çalışıyor (proje venv'i 3.9.6 ile doğrulandı,
+> ayrıca 3.11'de de test edildi). `torch==2.8.0` çok yeni Python sürümleri
+> (3.14+) için henüz derlenmiş wheel sunmuyor.
+>
+> **Anaconda/conda kullanıyorsanız dikkat:** Eğer bir conda ortamı (ör. `base`
+> veya kendi ortamınız) aktifse, `python3` komutu o ortamın Python'una işaret
+> edebilir — bu PyTorch'un desteklemediği çok yeni bir sürüm olabilir ve
+> `pip install -r requirements.txt` "Could not find a version that satisfies
+> the requirement torch==2.8.0" hatasıyla başarısız olur. Venv'i oluşturmadan
+> önce `conda deactivate` çalıştırın (gerekirse birden fazla kez) ya da
+> `python3 --version`'ı kontrol edip doğrudan sistem Python'unu kullanın
+> (macOS'ta genelde `/usr/bin/python3`).
 
 ```bash
+# conda aktifse önce: conda deactivate
 python3 -m venv venv
 source venv/bin/activate
+python3 --version   # 3.9-3.12 aralığında olmalı
 pip install -r requirements.txt
 ```
 
@@ -65,6 +77,16 @@ Sonuçlar `results/` altında: `clip_metrics.json`, `clip_few_shot_results.json`
 Diğer kişilerin `results/<model>_metrics.json` dosyalarını (aynı şema:
 `model_name`, `accuracy`, `inference_ms_per_image`, `model_size_mb`, `device`)
 eklemesiyle `--task compare` tam karşılaştırma tablosunu otomatik üretir.
+
+**Teslim doğrulama notu:** `requirements.txt`, sıfır bir sanal ortamda
+(`python3 -m venv` + `pip install -r requirements.txt`, Python 3.9.6) baştan
+test edildi. İki sorun bulunup düzeltildi: (1) `onnxruntime==1.31.1` PyPI'de
+hiç yayınlanmamış bir sürümdü, mevcut en güncel uyumlu sürüm olan `1.19.2`'ye
+düzeltildi; (2) conda ortamı aktifken `python3`'ün çok yeni/boş bir Python'a
+işaret edip kurulumu bozabileceği görüldü, bu kılavuza yukarıda eklendi.
+Düzeltmeden sonra tüm paketler (`torch`, `torchvision`, `transformers`,
+`onnxruntime`, `scikit-learn` vb.) temiz bir ortamda sorunsuz kuruldu ve
+import edildi.
 
 ---
 
