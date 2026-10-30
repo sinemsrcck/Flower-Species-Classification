@@ -224,3 +224,11 @@ data/
 *.pth
 *.pt
 .DS_Store
+
+# Local test environment
+/.venv-test/
+
+# Local inference test outputs
+/results/folder_mobilenet_test.json
+/results/folder_test.json
+/results/inference_check.json
