@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 
 import torch
-from PIL import Image
+from PIL import Image, ImageOps
 from torchvision import transforms
 
 from shared_model_loader import SharedModel
@@ -50,6 +50,8 @@ class SharedPredictor:
             raise ValueError("Invalid top_k value.")
 
         with Image.open(image_path) as image:
+            # Telefon fotoğraflarındaki EXIF yön bilgisini uygula (yan yatmış okunmasın)
+            image = ImageOps.exif_transpose(image)
             tensor = self.transform(
                 image.convert("RGB")
             ).unsqueeze(0)

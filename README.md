@@ -16,6 +16,8 @@ Flower species classification competition using PyTorch and transfer learning.
 > `python3 --version`'ı kontrol edip doğrudan sistem Python'unu kullanın
 > (macOS'ta genelde `/usr/bin/python3`).
 
+**macOS / Linux:**
+
 ```bash
 # conda aktifse önce: conda deactivate
 python3 -m venv venv
@@ -24,12 +26,44 @@ python3 --version   # 3.9-3.12 aralığında olmalı
 pip install -r requirements.txt
 ```
 
-Veri setini indirip aç:
+**Windows (PowerShell):**
+
+```powershell
+# conda aktifse önce: conda deactivate
+py -3.11 -m venv venv          # "py" yoksa: python -m venv venv
+.\venv\Scripts\Activate.ps1
+python --version               # 3.9-3.12 aralığında olmalı
+pip install -r requirements.txt
+```
+
+> `Activate.ps1` "running scripts is disabled" hatası verirse, aynı pencerede önce
+> `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` çalıştırın (yalnızca
+> o PowerShell penceresi için geçerlidir).
+
+Tahmin (iki sistemde de aynı):
 
 ```bash
+python predict.py --image path/to/flower.jpg --top-k 3
+```
+
+Veri setini indirip aç (yalnızca notebook'ları yeniden çalıştırmak için gerekir):
+
+**macOS / Linux:**
+
+```bash
+mkdir -p data
 curl -L -o data/flower_data.tar.gz https://s3.amazonaws.com/content.udacity-data.com/nd089/flower_data.tar.gz
 tar -xzf data/flower_data.tar.gz -C data/
 curl -L -o data/cat_to_name.json https://raw.githubusercontent.com/udacity/aipnd-project/master/cat_to_name.json
+```
+
+**Windows (PowerShell):** (`curl.exe` ve `tar` Windows 10/11'de yerleşik gelir)
+
+```powershell
+mkdir data -Force
+curl.exe -L -o data/flower_data.tar.gz https://s3.amazonaws.com/content.udacity-data.com/nd089/flower_data.tar.gz
+tar -xzf data/flower_data.tar.gz -C data/
+curl.exe -L -o data/cat_to_name.json https://raw.githubusercontent.com/udacity/aipnd-project/master/cat_to_name.json
 ```
 
 Bu işlemler sonunda `data/train`, `data/valid`, `data/test` (her biri 102 sınıf
@@ -40,7 +74,7 @@ klasörü) ve `data/cat_to_name.json` oluşur. `data/` git'e eklenmez (`.gitigno
 | Kişi | Görev | Teslimler |
 |---|---|---|
 | 1 | Ana Model ve Eğitim Altyapısı (EfficientNet-B0, veri hazırlama) | `dataset.py`, `efficientnet.ipynb`, `efficientnet_best.pth` |
-| 2 | Model Optimizasyonu ve Final Entegrasyon (MobileNetV3-Large) | `mobilenet.ipynb`, `evaluate.py`, `predict.py`, `mobilenet_best.pth` |
+| 2 | Model Optimizasyonu ve Final Entegrasyon (MobileNetV3-Large) | `mobilenet.ipynb`, `evaluate.py`, `predict.py`, `checkpoints/mobilenetv3_finetuned_best.pth` |
 | 3 | Genelleme ve Alternatif Model (CLIP) | `clip.ipynb`, `generalization_tests.py`, `results/` |
 | 4 | Güçlü Model ve Performans Analizi (EfficientNetV2-S) | `efficientnetv2.ipynb`, `metrics.py`, `efficientnetv2_best.pth` |
 

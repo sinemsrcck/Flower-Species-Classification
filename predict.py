@@ -7,10 +7,19 @@ from predict_shared import SharedPredictor
 
 DEFAULT_MODEL = "efficientnet_b0_onnx"
 
+# Model her çağrıda yeniden yüklenmesin diye önbellekte tutulur
+# (döngü içinde predict() çağrıldığında süreye model yükleme eklenmez).
+_PREDICTORS = {}
+
+
+def get_predictor(model_name=DEFAULT_MODEL):
+    if model_name not in _PREDICTORS:
+        _PREDICTORS[model_name] = SharedPredictor(model_name)
+    return _PREDICTORS[model_name]
+
 
 def predict(image_path, model_name=DEFAULT_MODEL, top_k=5):
-    predictor = SharedPredictor(model_name)
-    return predictor.predict(image_path, top_k=top_k)
+    return get_predictor(model_name).predict(image_path, top_k=top_k)
 
 
 def main():
