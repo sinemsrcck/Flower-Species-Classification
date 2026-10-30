@@ -164,34 +164,9 @@ from torchvision import models
 
 model = models.efficientnet_b0(weights=None)
 model.classifier[1] = nn.Linear(1280, 102)
-model.load_state_dict(torch.load("efficientnet_best.pth", map_location="cpu"))
+model.load_state_dict(torch.load("checkpoints/efficientnet_b0_final.pth", map_location="cpu"))
 model.eval()
 ```
-
-### 3. Kişi — Genelleme ve Alternatif Model (CLIP)
-
-
-Ortak veri yükleme kodu `dataset.py` (train/valid/test, augmentation, sayısal sınıf
-sırası "1"→0 … "102"→101) ve ImageNet ağırlıklı **EfficientNet-B0** fine-tuning'i
-(`efficientnet.ipynb`).
-
-**Eğitim:** İki aşamalı fine-tuning. Önce gövde dondurulup yalnızca sınıflandırıcı
-eğitildi (AdamW, lr 1e-3, 5 epoch), sonra tüm model açıldı (AdamW + cosine LR, 15 epoch).
-Label smoothing 0.1. Güçlü augmentation: TrivialAugmentWide + RandomErasing.
-
-**Denemeler** (`results/efficientnet_experiments.csv`):
-
-| Deneme | Aşama-2 LR | Güçlü augmentation | En iyi valid accuracy |
-|---|---|---|---|
-| **2_aug_lr3e-4 (final)** | **3e-4** | ✓ | **%99.63** |
-| 3_aug_lr6e-4 | 6e-4 | ✓ | %99.51 |
-| 1_strong_aug | 1e-4 | ✓ | %98.90 |
-| 0_baseline | 1e-4 | – | %98.66 |
-
-**Final model (test seti, 819 görüntü):** %99.02 accuracy, 16.07 MB. ONNX'e
-dönüştürülmüş hali (`onnx/efficientnet_b0_fp32.onnx`) PyTorch modeliyle 819/819 aynı
-tahmini veriyor (en büyük çıktı farkı 0.000088). Eğitim grafiği:
-`results/efficientnet_training.png`.
 
 ---
 
