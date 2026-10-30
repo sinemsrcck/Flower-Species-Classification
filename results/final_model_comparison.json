@@ -1,0 +1,42 @@
+[
+    {
+        "model": "EfficientNet-B0",
+        "accuracy_percent": 99.02,
+        "accuracy_split": "test",
+        "accuracy_source": "teammate-reported",
+        "cpu_inference_ms": 17.831,
+        "cpu_source": "our ONNX benchmark",
+        "model_size_mib": 15.776,
+        "deployment": "ONNX"
+    },
+    {
+        "model": "MobileNetV3-Large",
+        "accuracy_percent": 94.87179487179488,
+        "accuracy_split": "test",
+        "accuracy_source": "our verified evaluation (819 images)",
+        "cpu_inference_ms": 9.14,
+        "cpu_source": "our ONNX benchmark",
+        "model_size_mib": 16.805,
+        "deployment": "ONNX"
+    },
+    {
+        "model": "EfficientNetV2-S",
+        "accuracy_percent": 98.17,
+        "accuracy_split": "test",
+        "accuracy_source": "teammate-reported",
+        "cpu_inference_ms": 108.595,
+        "cpu_source": "our ONNX benchmark",
+        "model_size_mib": 77.324,
+        "deployment": "ONNX"
+    },
+    {
+        "model": "CLIP ViT-B/32",
+        "accuracy_percent": 66.54,
+        "accuracy_split": "test",
+        "accuracy_source": "teammate-reported zero-shot",
+        "cpu_inference_ms": 56.58,
+        "cpu_source": "teammate-reported updated CPU benchmark",
+        "model_size_mib": null,
+        "deployment": "PyTorch / HuggingFace"
+    }
+]

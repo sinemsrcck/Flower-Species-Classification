@@ -1,0 +1,5 @@
+model,accuracy_percent,accuracy_split,accuracy_source,cpu_inference_ms,cpu_source,model_size_mib,deployment
+EfficientNet-B0,99.02,test,teammate-reported,17.831,our ONNX benchmark,15.776,ONNX
+MobileNetV3-Large,94.87179487179488,test,our verified evaluation (819 images),9.14,our ONNX benchmark,16.805,ONNX
+EfficientNetV2-S,98.17,test,teammate-reported,108.595,our ONNX benchmark,77.324,ONNX
+CLIP ViT-B/32,66.54,test,teammate-reported zero-shot,56.58,teammate-reported updated CPU benchmark,,PyTorch / HuggingFace
