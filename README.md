@@ -50,3 +50,63 @@ Sonuçlar `results/` altında: `clip_metrics.json`, `clip_few_shot_results.json`
 Diğer kişilerin `results/<model>_metrics.json` dosyalarını (aynı şema:
 `model_name`, `accuracy`, `inference_ms_per_image`, `model_size_mb`, `device`)
 eklemesiyle `--task compare` tam karşılaştırma tablosunu otomatik üretir.
+
+---
+
+## 2. Kişi — MobileNetV3-Large ve Final Model Entegrasyonu
+
+### MobileNetV3-Large
+
+MobileNetV3-Large modeli, Oxford Flowers 102 veri seti üzerinde
+transfer learning kullanılarak eğitildi.
+
+Modelin PyTorch ve ONNX sürümleri karşılaştırıldı ve
+CPU inference performansı değerlendirildi.
+
+Sonuçlar:
+
+| Metrik | Değer |
+|---|---|
+| Validation Accuracy | 96.94% |
+| Test Accuracy | 94.87% |
+| ONNX CPU Inference | 9.14 ms/image |
+| ONNX Model Size | 16.80 MiB |
+
+Test doğruluğu, 819 test görüntüsü üzerinde bağımsız olarak hesaplandı.
+
+### Final Model Selection
+
+Four models were compared using classification accuracy,
+CPU inference latency, and model size.
+
+| Model | Test Accuracy | CPU Latency | Model Size |
+|---|---:|---:|---:|
+| EfficientNet-B0 | 99.02% | 17.83 ms | 15.78 MiB |
+| MobileNetV3-Large | 94.87% | 9.14 ms | 16.80 MiB |
+| EfficientNetV2-S | 98.17% | 108.59 ms | 77.32 MiB |
+| CLIP ViT-B/32 (zero-shot) | 66.54% | 56.58 ms | Not reported |
+
+Note: Some accuracy values and CLIP CPU latency are teammate-reported.
+CPU benchmarks were not all performed on identical hardware.
+
+EfficientNet-B0 was selected as the final inference model
+because of its high accuracy and efficient CPU performance.
+
+### Final Inference Pipeline
+
+The final prediction pipeline uses ONNX Runtime and supports
+CPU-only inference.
+
+Required files:
+
+- `predict.py`
+- `predict_shared.py`
+- `shared_model_loader.py`
+- `model_registry.json`
+- `class_to_idx.json`
+- `onnx/efficientnet_b0_fp32.onnx`
+
+Run inference:
+
+```bash
+python predict.py --image path/to/flower.jpg --top-k 3
