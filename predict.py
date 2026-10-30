@@ -6,7 +6,7 @@ from pathlib import Path
 from predict_shared import SharedPredictor
 
 
-DEFAULT_MODEL = "efficientnet_b0_onnx"
+DEFAULT_MODEL = "efficientnet_b0_pytorch"
 
 # Model her çağrıda yeniden yüklenmesin diye önbellekte tutulur
 # (döngü içinde predict() çağrıldığında süreye model yükleme eklenmez).
