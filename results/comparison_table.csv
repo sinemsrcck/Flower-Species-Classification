@@ -1,3 +1,5 @@
 model_name,accuracy,inference_ms_per_image,model_size_mb,device,final_score
-CLIP-ViT-B/32 (zero-shot),0.6654,84.3,577.08,cpu,55.66
+CLIP-ViT-B/32 (zero-shot),0.6654,56.58,577.08,cpu (1 thread),62.93
 EfficientNet-B0 (fine-tuned),0.9902,41.6,16.07,"cpu (Colab, 1 thread)",
+EfficientNetV2-S (fine-tuned),0.9817,119.62,39.28,"cpu (Colab, 1 thread)",82.72
+"MobileNetV3-Large (fine-tuned, ONNX)",0.9487,9.14,16.81,"cpu (ONNX Runtime, 1 thread)",96.92

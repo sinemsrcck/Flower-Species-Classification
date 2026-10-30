@@ -223,3 +223,4 @@ __marimo__/
 data/
 *.pth
 *.pt
+.DS_Store
