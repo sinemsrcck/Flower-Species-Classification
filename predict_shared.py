@@ -8,6 +8,14 @@ from torchvision import transforms
 
 from shared_model_loader import SharedModel
 
+PROJECT_DIR = Path(__file__).resolve().parent
+CAT_TO_NAME_PATH = PROJECT_DIR / "cat_to_name.json"
+
+
+def load_cat_to_name():
+    with open(CAT_TO_NAME_PATH, "r", encoding="utf-8") as f:
+        return json.load(f)
+
 
 def get_transform():
     return transforms.Compose([
@@ -25,10 +33,12 @@ class SharedPredictor:
     def __init__(self, model_name):
         self.model = SharedModel(model_name, device="cpu")
         self.transform = get_transform()
-        self.idx_to_class = {
-            index: name
-            for name, index in self.model.class_to_idx.items()
+        # model.class_to_idx: {"1": 0, "2": 1, ...} -> idx_to_class_id: {0: "1", 1: "2", ...}
+        self.idx_to_class_id = {
+            index: class_id
+            for class_id, index in self.model.class_to_idx.items()
         }
+        self.cat_to_name = load_cat_to_name()
 
     def predict(self, image_path, top_k=5):
         image_path = Path(image_path)
@@ -56,9 +66,11 @@ class SharedPredictor:
 
         for score, index in zip(scores, indices):
             class_index = int(index.item())
+            class_id = self.idx_to_class_id[class_index]
 
             predictions.append({
-                "class_name": self.idx_to_class[class_index],
+                "class_name": self.cat_to_name.get(class_id, f"unknown (class {class_id})"),
+                "class_id": class_id,
                 "class_index": class_index,
                 "confidence": float(score.item())
             })
