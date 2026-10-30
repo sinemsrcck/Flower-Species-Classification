@@ -93,6 +93,79 @@ varsayılan olarak bunu kullanır ve ek indirme gerektirmez. MobileNetV3 checkpo
 de repoda (`checkpoints/mobilenetv3_finetuned_best.pth`); `predict.py --model mobilenetv3_pytorch`
 ile çalıştırılabilir.
 
+---
+
+## 1. Kişi — EfficientNet-B0 (Final Model) ve Ortak Veri Hazırlığı
+
+### Ortak veri kodu (`dataset.py`)
+
+Bütün modeller aynı veri kodunu kullanır:
+
+```python
+from dataset import get_dataloaders
+train_loader, valid_loader, test_loader, classes = get_dataloaders("data/")
+```
+
+- **Sınıf sırası sayısal:** klasör `"1"` → 0, `"2"` → 1, …, `"102"` → 101.
+  `ImageFolder`'ın alfabetik sırası (`1, 10, 100, …`) düzeltildi; `class_to_idx.json` ile aynıdır.
+- **Inference preprocessing:** `Resize(256)` → `CenterCrop(224)` → `ToTensor` → ImageNet normalize
+  (mean `[0.485, 0.456, 0.406]`, std `[0.229, 0.224, 0.225]`).
+- **Train augmentation:** sadece eğitimde kullanılır, valid/test/tahminde kullanılmaz.
+
+### Eğitim (`efficientnet.ipynb`)
+
+ImageNet ağırlıklı `torchvision.models.efficientnet_b0`, son katman `Linear(1280, 102)` olarak değiştirildi.
+
+| Aşama | Ne eğitildi | Epoch | Learning rate |
+|---|---|---|---|
+| 1 | Sadece son katman (gövde donduruldu) | 5 | 1e-3 |
+| 2 | Tüm model (fine-tuning) | 15 | 3e-4, cosine azalma |
+
+Ortak ayarlar: AdamW (weight decay 1e-4), label smoothing 0.1, batch size 32,
+güçlü augmentation (RandomResizedCrop 0.5–1.0, yatay çevirme, TrivialAugmentWide, RandomErasing).
+En iyi model valid accuracy'ye göre seçildi; test setine sadece en sonda bir kez bakıldı.
+
+![EfficientNet-B0 eğitim grafiği](results/efficientnet_training.png)
+
+### Hyperparameter / augmentation denemeleri
+
+| Deneme | Augmentation | LR (aşama 2) | Valid acc |
+|---|---|---|---|
+| 0 – baseline | standart | 1e-4 | 98.66% |
+| 1 | güçlü | 1e-4 | 98.90% |
+| **2 – final** | **güçlü** | **3e-4** | **99.63%** |
+| 3 | güçlü | 6e-4 | 99.51% |
+
+Tablo: `results/efficientnet_experiments.csv`. Learning rate 3e-4 civarında en iyi sonucu verdi.
+Valid accuracy doygunluğa ulaştığı için batch size denemesi yapılmadı.
+
+### Final sonuçlar
+
+| Metrik | Değer |
+|---|---|
+| Valid accuracy | 99.63% |
+| Test accuracy (819 görüntü) | **99.02%** |
+| Model boyutu (`.pth`) | 16.07 MB |
+| CPU süresi (sadece model, Colab 1 thread) | ~42–48 ms/görüntü |
+
+### Doğrulama
+
+- Drive'daki `efficientnet_best.pth`, kazanan deneme dosyasıyla birebir aynı (MD5).
+- `.pth` ve `onnx/efficientnet_b0_fp32.onnx` aynı test setinde: **ikisi de 99.02%**,
+  819/819 görüntüde aynı tahmin, en büyük çıktı farkı 0.000088.
+
+### PyTorch ile yükleme
+
+```python
+import torch, torch.nn as nn
+from torchvision import models
+
+model = models.efficientnet_b0(weights=None)
+model.classifier[1] = nn.Linear(1280, 102)
+model.load_state_dict(torch.load("efficientnet_best.pth", map_location="cpu"))
+model.eval()
+```
+
 ### 3. Kişi — Genelleme ve Alternatif Model (CLIP)
 
 CLIP (`openai/clip-vit-base-patch32`) ile zero-shot/few-shot sınıflandırma,
