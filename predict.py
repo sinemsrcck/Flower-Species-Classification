@@ -1,5 +1,6 @@
 import argparse
 import json
+import sys
 from pathlib import Path
 
 from predict_shared import SharedPredictor
@@ -70,15 +71,35 @@ def main():
 
     args = parser.parse_args()
 
-    if args.image_dir:
-        result = predict_dir(args.image_dir, model_name=args.model, top_k=args.top_k)
-    else:
-        result = predict(
-            image_path=args.image,
-            model_name=args.model,
-            top_k=args.top_k
-        )
+    try:
+        if args.image and not Path(args.image).is_file():
+            raise FileNotFoundError(
+                f"Görüntü dosyası bulunamadı: {args.image}"
+            )
 
+        if args.image_dir and not Path(args.image_dir).is_dir():
+            raise NotADirectoryError(
+                f"Görüntü klasörü bulunamadı: {args.image_dir}"
+            )
+
+        if args.image_dir:
+            result = predict_dir(
+                args.image_dir,
+                model_name=args.model,
+                top_k=args.top_k
+            )
+        else:
+            result = predict(
+                image_path=args.image,
+                model_name=args.model,
+                top_k=args.top_k
+            )
+
+    except (FileNotFoundError, NotADirectoryError,
+            PermissionError, ValueError, OSError) as exc:
+        print(f"HATA: {exc}", file=sys.stderr)
+        sys.exit(1)
+        
     if args.output:
         output_path = Path(args.output)
         output_path.parent.mkdir(
