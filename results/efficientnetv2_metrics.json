@@ -10,10 +10,18 @@
   "precision_macro": 0.9796,
   "recall_macro": 0.9825,
   "f1_macro": 0.9787,
-  "estimated_final_score": 82.7178,
+  "competition_score": {
+    "accuracy_pct": 98.17,
+    "speed_score": 41.8,
+    "size_score": 89.1,
+    "final_score": 82.72,
+    "tmax_ms": 50,
+    "smax_mb": 35
+  },
   "best_hparams": {
     "lr": 0.001,
     "batch_size": 32,
     "optimizer": "adamw"
-  }
+  },
+  "_source_note": "Kaynak: kişi 4'ün kisi4-efficientnetv2 branch'indeki results/efficientnetv2_metrics.json. competition_score alanı eklendi (orijinal 'estimated_final_score': 82.7178 ile aynı formülle eşleşiyor). Kişi 4'ün efficientnetv2_resolution.csv dosyasına göre 192px girdi çözünürlüğü kullanılırsa final_score 86.86'ya çıkıyor (accuracy 0.985, 87.0ms) — ama şu an teslim edilen model 224px konfigürasyonu."
 }

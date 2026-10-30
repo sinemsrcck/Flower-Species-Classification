@@ -182,11 +182,13 @@ def run_compare():
         print("Hiç *_metrics.json bulunamadı; önce clip.ipynb'yi çalıştırın.")
         return []
 
-    header = f"{'model':30s} {'accuracy':>10s} {'ms/image':>10s} {'size (MB)':>10s}"
+    header = f"{'model':30s} {'accuracy':>10s} {'ms/image':>10s} {'size (MB)':>10s} {'final score':>12s}"
     print(header)
     for r in rows:
+        final_score = r.get("competition_score", {}).get("final_score")
+        final_score_str = f"{final_score:.2f}" if final_score is not None else "n/a"
         print(f"{r.get('model_name', ''):30s} {r.get('accuracy', 0):10.4f} "
-              f"{r.get('inference_ms_per_image', 0):10.2f} {r.get('model_size_mb', 0):10.2f}")
+              f"{r.get('inference_ms_per_image', 0):10.2f} {r.get('model_size_mb', 0):10.2f} {final_score_str:>12s}")
 
     others = [r for r in rows if "CLIP" not in r.get("model_name", "")]
     if not others:
@@ -212,12 +214,14 @@ def run_compare():
     plt.savefig(RESULTS_DIR / "comparison_chart.png", dpi=150, facecolor=STYLE["surface"])
     plt.close(fig)
 
-    fieldnames = ["model_name", "accuracy", "inference_ms_per_image", "model_size_mb", "device"]
+    fieldnames = ["model_name", "accuracy", "inference_ms_per_image", "model_size_mb", "device", "final_score"]
     with open(RESULTS_DIR / "comparison_table.csv", "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         for r in rows:
-            writer.writerow({k: r.get(k, "") for k in fieldnames})
+            row = {k: r.get(k, "") for k in fieldnames if k != "final_score"}
+            row["final_score"] = r.get("competition_score", {}).get("final_score", "")
+            writer.writerow(row)
 
     print("Kaydedildi: results/comparison_table.csv, results/comparison_chart.png")
     return rows

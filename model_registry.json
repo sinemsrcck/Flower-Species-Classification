@@ -1,0 +1,12 @@
+{
+    "efficientnet_b0_onnx": {
+        "architecture": "efficientnet_b0",
+        "backend": "onnxruntime",
+        "checkpoint": "onnx/efficientnet_b0_fp32.onnx",
+        "num_classes": 102,
+        "image_size": 224,
+        "preprocessing": "imagenet_resize256_centercrop224",
+        "class_mapping": "class_to_idx.json",
+        "enabled": true
+    }
+}

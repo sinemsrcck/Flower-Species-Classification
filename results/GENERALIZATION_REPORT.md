@@ -27,10 +27,28 @@ Tüm deneyler `clip.ipynb` ve `generalization_tests.py` içinde yeniden
   bozulma türü (gaussian_noise, gaussian_blur, brightness, contrast, rotation,
   jpeg_compression, occlusion) × 5 şiddet seviyesi (1=hafif, 5=şiddetli)
   uygulanarak zero-shot accuracy ölçüldü (bkz. `src/corruptions.py`).
-- **Metrikler:** accuracy, inference hızı (ms/görüntü, batch_size=1, warm-up
-  sonrası ortalama), model boyutu (parametre belleği, MB) —
-  `results/clip_metrics.json` şeması diğer takım üyelerinin `evaluate.py`
-  çıktısıyla aynıdır, böylece `--task compare` ile otomatik birleştirilebilir.
+- **Metrikler:** accuracy, inference hızı (ms/görüntü, **CPU, 1 thread, 10
+  ısınma + 100 ölçüm görüntüsü** — kişi 1 ve 4'ün `metrics.py`'deki
+  `measure_cpu_latency()` yöntemiyle birebir aynı, takım genelinde CPU
+  sayılarının karşılaştırılabilir olması için), model boyutu (parametre
+  belleği, MB) — `results/clip_metrics.json` şeması diğer takım üyelerinin
+  `evaluate.py`/`metrics.py` çıktısıyla aynıdır, böylece `--task compare` ile
+  otomatik birleştirilebilir.
+- **Yarışma skorlama formülü** (`Flower_Recognition_Competition_Guidelines_v1.pdf`'den):
+  `FINAL SCORE = 0.60×Accuracy(%) + 0.25×Speed_score + 0.15×Size_score`, burada
+  `Speed_score = min(100, Tmax/T × 100)` (Tmax=50 ms, GPU'suz Intel i7 + 16GB RAM
+  üzerinde ölçülecek) ve `Size_score = min(100, Smax/S × 100)` (Smax=35 MB). Bu
+  formül `clip.ipynb` ve `generalization_tests.py --task compare` içinde
+  otomatik hesaplanıyor.
+- **Ölçüm düzeltme geçmişi:** İlk denemede inference hızı yanlışlıkla Apple
+  GPU'da (`mps`) ölçülmüştü; sonra CPU'ya çevrildi ama thread sayısı
+  sabitlenmemişti (çoklu-thread, n=50). Kişi 4'ün `metrics.py` dosyasını
+  incelerken takımın **1 thread, n=100, warmup=10** standardını kullandığı
+  görüldü — CLIP de bu standarda göre yeniden ölçüldü. İlginç bulgu: 1 thread'de
+  CLIP daha **hızlı** çıktı (56.58ms) çoklu-thread'li ölçüme (84.30ms) göre —
+  küçük batch=1 işlemlerde thread senkronizasyon overhead'i çoklu-thread'i
+  yavaşlatabiliyor. MPS değeri bilgi amaçlı `inference_ms_per_image_mps`
+  alanında ayrıca saklanıyor.
 
 ## Sonuçlar
 
@@ -85,24 +103,31 @@ rotasyon/sıkıştırmadan çok daha kritik bir risk faktörü.
 
 ### Ana modellerle karşılaştırma (`results/comparison_table.csv/png`)
 
-| Model | Accuracy | ms/görüntü | Boyut (MB) |
-|---|---|---|---|
-| CLIP-ViT-B/32 (zero-shot) | 0.6654 | ~30-40 (MPS, run'lar arası değişken) | 577.08 |
-| EfficientNet-B0 (1. kişi) | *bekleniyor* | | |
-| MobileNetV3 (2. kişi) | *bekleniyor* | | |
-| EfficientNetV2-S (4. kişi) | *bekleniyor* | | |
+| Model | Accuracy (test) | ms/görüntü (CPU, 1 thread) | Boyut (MB) | Final Score* |
+|---|---|---|---|---|
+| CLIP-ViT-B/32 (zero-shot) | 0.6654 | 56.58 | 577.08 | **62.93** |
+| EfficientNet-B0 (1. kişi, fine-tuned) | 0.9902 | 41.60 | 16.07 | **99.41** |
+| MobileNetV3-Large (2. kişi, fine-tuned, ONNX) | 0.9487 | 9.14 | 16.81 | **96.92** |
+| EfficientNetV2-S (4. kişi, fine-tuned) | 0.9817 | 119.62 | 39.28 | **82.72** |
 
-Diğer takım üyelerinin `results/<model>_metrics.json` dosyaları (aynı şema)
-eklendiğinde, `python generalization_tests.py --task compare` tekrar
-çalıştırılarak tam karşılaştırma tablosu ve grafiği otomatik üretilir.
+\* `FINAL SCORE = 0.60×Accuracy(%) + 0.25×Speed_score + 0.15×Size_score` (Tmax=50ms, Smax=35MB — bkz. Yöntem). Dördü de kendi `results/<model>_metrics.json` dosyalarındaki accuracy/hız/boyut değerleriyle aynı formülle hesaplandı.
 
-CLIP'in model boyutu (577 MB), hafif mimarilere (tipik 15-20 MB) kıyasla
-**~30 kat** daha büyük — zero-shot esnekliğinin (sıfır eğitim verisi
-gerektirmemesi) bedeli, boyut ve hız kriterlerinde dezavantaj.
+**Düzeltme notu:** Takımın ilk WhatsApp özetinde MobileNetV3 için "%96,94" test accuracy olarak paylaşılmıştı; kişi 2'nin resmi `mobilenetv3_test_metrics.json` dosyasına göre bu aslında **validation** accuracy'si — gerçek **test accuracy %94,87** (777/819 doğru). Tablo bu düzeltilmiş rakamla güncellendi.
 
-*Not: `inference_ms_per_image` değeri, MPS (Apple Silicon GPU) üzerinde
-run'dan run'a ~10-15 ms değişkenlik gösterebiliyor (sistem yüküne bağlı);
-güncel değer için `results/clip_metrics.json`'a bakın.*
+Takımın dört modeli de artık `results/` altında — `generalization_tests.py --task
+compare` her çalıştırıldığında tabloyu/grafiği otomatik günceller
+(`results/comparison_table.csv`, `results/comparison_chart.png`).
+
+CLIP'in model boyutu (577 MB), diğer üç modele (16-39 MB aralığı) kıyasla
+**~15-36 kat** daha büyük. Yarışma formülüyle sıralama: **EfficientNet-B0
+(99.41) > MobileNetV3 (96.92) > EfficientNetV2-S (82.72) > CLIP (62.93)**.
+EfficientNetV2-S'in düşük skorunun sebebi CPU inference süresi (119.62ms,
+`Tmax=50ms`'nin 2 katından fazla) — model boyutu (39.28 MB) ve accuracy
+(%98.17) kendi başına iyi olsa da hız kriteri skoru ciddi düşürüyor. Bu
+beklenen bir sonuç: EfficientNet-B0, MobileNetV3 ve EfficientNetV2-S bu 102
+sınıf için özel olarak fine-tune edildi (MobileNetV3 ayrıca ONNX Runtime'a
+dönüştürülerek CPU'da ekstra hızlandırılmış), CLIP ise hiç eğitilmeden genel
+amaçlı bir model.
 
 ## Değerlendirme ve Öneriler
 
@@ -120,3 +145,23 @@ güncel değer için `results/clip_metrics.json`'a bakın.*
 4. **Few-shot bulgusu**: çok az etiketli veri olan senaryolarda (k≥2) CLIP
    tabanlı linear probe, hızlı ve ucuz bir alternatif olabilir; ama k=1 ile
    güvenilir değil.
+5. **CLIP, takımın yarışmaya gönderilecek asıl modeli değil**: PDF'deki
+   "students must submit a model that can be loaded and evaluated using the
+   instructor's required interface" kuralı muhtemelen 2. kişinin
+   `predict.py`/final paketine işaret ediyor. CLIP burada bir genelleme/analiz
+   çalışması; yarışma formülüyle puanlandığında (62.93/100) takımın diğer üç
+   modelinin gerisinde kalması beklenen ve sorunlu olmayan bir sonuç — CLIP'in
+   katkısı accuracy/hız/boyut yarışında değil, genelleme ve dayanıklılık
+   analizinde.
+6. **Takımın dört modeli arasında final teslim için öneri**: yarışma
+   skoruna göre sıralama EfficientNet-B0 (99.41) > MobileNetV3 (96.92) >
+   EfficientNetV2-S (82.72) > CLIP (62.93). **EfficientNet-B0** en yüksek
+   skoru alıyor (yüksek accuracy + düşük boyut + makul hız dengesi);
+   **MobileNetV3 (ONNX)** çok yakın bir alternatif ve en düşük inference
+   süresine sahip (9.14ms) — gerçek "Intel i7, no GPU" ortamında ONNX
+   Runtime'ın ek hız avantajı riski azaltabilir. **EfficientNetV2-S** accuracy
+   olarak güçlü (%98.17) ama CPU'da yavaş (119.62ms, `Tmax`'ın 2 katından
+   fazla) kaldığı için final teslim için şu haliyle önerilmiyor — kişi 4'ün
+   kendi `efficientnetv2_resolution.csv` denemesine göre 192px girdi
+   çözünürlüğüyle hem accuracy (%98.5) hem hız (87ms) iyileşip final_score
+   86.86'ya çıkıyor; bu konfigürasyon denenmeye değer.

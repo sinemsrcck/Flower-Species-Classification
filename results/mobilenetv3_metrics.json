@@ -1,0 +1,20 @@
+{
+  "model_name": "MobileNetV3-Large (fine-tuned, ONNX)",
+  "accuracy": 0.9487,
+  "inference_ms_per_image": 9.14,
+  "model_size_mb": 16.81,
+  "device": "cpu (ONNX Runtime, 1 thread)",
+  "num_test_images": 819,
+  "correct_predictions": 777,
+  "incorrect_predictions": 42,
+  "validation_accuracy": 0.9694,
+  "competition_score": {
+    "accuracy_pct": 94.87,
+    "speed_score": 100.0,
+    "size_score": 100.0,
+    "final_score": 96.92,
+    "tmax_ms": 50,
+    "smax_mb": 35
+  },
+  "_source_note": "Kaynak: kişi 2'nin MobileNetV3_Model_Info.md / mobilenetv3_test_metrics.json dosyaları. accuracy alanı TEST split (94.87%); validation_accuracy (96.94%) ayrıca bilgi amaçlı tutuldu çünkü ilk WhatsApp özetinde yanlışlıkla test accuracy olarak gösterilmişti."
+}

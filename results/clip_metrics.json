@@ -1,8 +1,17 @@
 {
   "model_name": "CLIP-ViT-B/32 (zero-shot)",
   "accuracy": 0.6654,
-  "inference_ms_per_image": 41.43,
+  "inference_ms_per_image": 56.58,
+  "inference_ms_per_image_mps": 29.3,
   "model_size_mb": 577.08,
-  "device": "mps",
-  "num_test_images": 819
+  "device": "cpu (1 thread)",
+  "num_test_images": 819,
+  "competition_score": {
+    "accuracy_pct": 66.54,
+    "speed_score": 88.36,
+    "size_score": 6.07,
+    "final_score": 62.93,
+    "tmax_ms": 50,
+    "smax_mb": 35
+  }
 }
