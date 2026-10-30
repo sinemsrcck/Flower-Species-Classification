@@ -1,6 +1,8 @@
 # Flower-Species-Classification
 Flower species classification competition using PyTorch and transfer learning.
 
+**SENG 481 — Grup üyeleri:** Fatma Zehra Anbar · Sinem Sarıçiçek · İrem Nur Yavuz · Zeynep Seray Uğur
+
 ## Kurulum
 
 > **Python sürümü:** 3.9–3.12 arası çalışıyor (proje venv'i 3.9.6 ile doğrulandı,
@@ -71,16 +73,16 @@ klasörü) ve `data/cat_to_name.json` oluşur. `data/` git'e eklenmez (`.gitigno
 
 ## Takım Görev Dağılımı
 
-| Kişi | Görev | Teslimler |
+| Üye | Görev | Teslimler |
 |---|---|---|
-| 1 | Ana Model ve Eğitim Altyapısı (EfficientNet-B0, veri hazırlama) | `dataset.py`, `efficientnet.ipynb`, `efficientnet_best.pth` |
-| 2 | Model Optimizasyonu ve Final Entegrasyon (MobileNetV3-Large) | `mobilenet.ipynb`, `evaluate.py`, `predict.py`, `checkpoints/mobilenetv3_finetuned_best.pth` |
-| 3 | Genelleme ve Alternatif Model (CLIP) | `clip.ipynb`, `generalization_tests.py`, `results/` |
-| 4 | Güçlü Model ve Performans Analizi (EfficientNetV2-S) | `efficientnetv2.ipynb`, `metrics.py`, `efficientnetv2_best.pth` |
+| Fatma Zehra Anbar | Ana Model ve Eğitim Altyapısı (EfficientNet-B0, veri hazırlama) | `dataset.py`, `efficientnet.ipynb`, `efficientnet_best.pth` |
+| Sinem Sarıçiçek | Model Optimizasyonu ve Final Entegrasyon (MobileNetV3-Large) | `mobilenet.ipynb`, `evaluate.py`, `predict.py`, `checkpoints/mobilenetv3_finetuned_best.pth` |
+| İrem Nur Yavuz | Genelleme ve Alternatif Model (CLIP) | `clip.ipynb`, `generalization_tests.py`, `results/` |
+| Zeynep Seray Uğur | Güçlü Model ve Performans Analizi (EfficientNetV2-S) | `efficientnetv2.ipynb`, `metrics.py`, `efficientnetv2_best.pth` |
 
 ### Model Dosyaları (Google Drive)
 
-`.pth` dosyaları GitHub'a yüklenmediği için (`.gitignore`) Drive'da paylaşılıyor.
+Tüm model dosyaları Drive'da da paylaşılıyor (EfficientNetV2-S yalnızca Drive'da; boyutu nedeniyle repoya eklenmedi).
 
 | Model | Dosya | Boyut | Test accuracy |
 |---|---|---|---|
@@ -89,45 +91,37 @@ klasörü) ve `data/cat_to_name.json` oluşur. `data/` git'e eklenmez (`.gitigno
 | EfficientNetV2-S | [efficientnetv2_best.pth](https://drive.google.com/file/d/1Pxuz-DyhDthYKstTQ_-KiJXFqRAU5Svq/view?usp=sharing) | 39.28 MB (fp16) | %98.17 |
 
 Final ONNX modeli (`onnx/efficientnet_b0_fp32.onnx`) repoda bulunuyor; `predict.py`
-varsayılan olarak bunu kullanır ve ek indirme gerektirmez. MobileNetV3 checkpoint'i
-de repoda (`checkpoints/mobilenetv3_finetuned_best.pth`); `predict.py --model mobilenetv3_pytorch`
-ile çalıştırılabilir.
+varsayılan olarak bunu kullanır ve ek indirme gerektirmez. Final B0 modelinin PyTorch
+hali (`checkpoints/efficientnet_b0_final.pth`) ve MobileNetV3 checkpoint'i
+(`checkpoints/mobilenetv3_finetuned_best.pth`) da repoda; Drive linkleri yedek olarak duruyor.
 
-### 3. Kişi — Genelleme ve Alternatif Model (CLIP)
+## Fatma Zehra Anbar — EfficientNet-B0 (Final Model) ve Eğitim Altyapısı
 
-CLIP (`openai/clip-vit-base-patch32`) ile zero-shot/few-shot sınıflandırma,
-veri setinde olmayan türlerle genelleme testi, görüntü bozulmalarına
-dayanıklılık testi ve ana modellerle karşılaştırma.
+Ortak veri yükleme kodu `dataset.py` (train/valid/test, augmentation, sayısal sınıf
+sırası "1"→0 … "102"→101) ve ImageNet ağırlıklı **EfficientNet-B0** fine-tuning'i
+(`efficientnet.ipynb`).
 
-```bash
-# Tüm deneyleri çalıştır (clip.ipynb'nin zero-shot/few-shot adımları ayrıca çalıştırılmalı)
-jupyter nbconvert --to notebook --execute --inplace clip.ipynb
+**Eğitim:** İki aşamalı fine-tuning. Önce gövde dondurulup yalnızca sınıflandırıcı
+eğitildi (AdamW, lr 1e-3, 5 epoch), sonra tüm model açıldı (AdamW + cosine LR, 15 epoch).
+Label smoothing 0.1. Güçlü augmentation: TrivialAugmentWide + RandomErasing.
 
-# OOD / bozulma / karşılaştırma testleri
-python generalization_tests.py --task all
-```
+**Denemeler** (`results/efficientnet_experiments.csv`):
 
-Sonuçlar `results/` altında: `clip_metrics.json`, `clip_few_shot_results.json`,
-`ood_results.json`, `corruption_robustness.json/png`, `comparison_table.csv`,
-`comparison_chart.png`, `GENERALIZATION_REPORT.md`.
+| Deneme | Aşama-2 LR | Güçlü augmentation | En iyi valid accuracy |
+|---|---|---|---|
+| **2_aug_lr3e-4 (final)** | **3e-4** | ✓ | **%99.63** |
+| 3_aug_lr6e-4 | 6e-4 | ✓ | %99.51 |
+| 1_strong_aug | 1e-4 | ✓ | %98.90 |
+| 0_baseline | 1e-4 | – | %98.66 |
 
-Diğer kişilerin `results/<model>_metrics.json` dosyalarını (aynı şema:
-`model_name`, `accuracy`, `inference_ms_per_image`, `model_size_mb`, `device`)
-eklemesiyle `--task compare` tam karşılaştırma tablosunu otomatik üretir.
-
-**Teslim doğrulama notu:** `requirements.txt`, sıfır bir sanal ortamda
-(`python3 -m venv` + `pip install -r requirements.txt`, Python 3.9.6) baştan
-test edildi. İki sorun bulunup düzeltildi: (1) `onnxruntime==1.31.1` PyPI'de
-hiç yayınlanmamış bir sürümdü, mevcut en güncel uyumlu sürüm olan `1.19.2`'ye
-düzeltildi; (2) conda ortamı aktifken `python3`'ün çok yeni/boş bir Python'a
-işaret edip kurulumu bozabileceği görüldü, bu kılavuza yukarıda eklendi.
-Düzeltmeden sonra tüm paketler (`torch`, `torchvision`, `transformers`,
-`onnxruntime`, `scikit-learn` vb.) temiz bir ortamda sorunsuz kuruldu ve
-import edildi.
+**Final model (test seti, 819 görüntü):** %99.02 accuracy, 16.07 MB. ONNX'e
+dönüştürülmüş hali (`onnx/efficientnet_b0_fp32.onnx`) PyTorch modeliyle 819/819 aynı
+tahmini veriyor (en büyük çıktı farkı 0.000088). Eğitim grafiği:
+`results/efficientnet_training.png`.
 
 ---
 
-## 2. Kişi — MobileNetV3-Large ve Final Model Entegrasyonu
+## Sinem Sarıçiçek — MobileNetV3-Large ve Final Model Entegrasyonu
 
 ### MobileNetV3-Large
 
@@ -178,6 +172,7 @@ Required files:
 - `shared_model_loader.py`
 - `model_registry.json`
 - `class_to_idx.json`
+- `cat_to_name.json`
 - `onnx/efficientnet_b0_fp32.onnx`
 
 Run inference:
@@ -186,9 +181,70 @@ Run inference:
 python predict.py --image path/to/flower.jpg --top-k 3
 ```
 
+#### Ek kullanım seçenekleri
+
+```bash
+# Klasördeki tüm görüntüler (alt klasörler dahil). Alt klasör adları sınıf
+# numarasıysa (ör. test/47/x.jpg) top-1 accuracy de hesaplanır.
+python predict.py --image-dir path/to/images --top-k 1 --output results.json
+
+# Aynı final model, saf PyTorch ile (ONNX Runtime gerektirmez; ONNX ile 819/819 aynı tahmin)
+python predict.py --image path/to/flower.jpg --model efficientnet_b0_pytorch
+
+# Diğer model
+python predict.py --image path/to/flower.jpg --model mobilenetv3_pytorch
+```
+
+Python içinden (model ilk çağrıda bir kez yüklenir, sonraki çağrılar hızlıdır):
+
+```python
+from predict import predict
+result = predict("flower.jpg", top_k=3)
+result["predictions"][0]   # {"class_name": "rose", "class_id": "74", "class_index": 73, "confidence": 0.97}
+```
+
+- `class_id` veri setindeki klasör numarasıdır (1–102), `class_name` çiçek adıdır.
+- Telefon fotoğraflarındaki EXIF yön bilgisi otomatik uygulanır.
+- ONNX Runtime varsayılan olarak tüm CPU çekirdeklerini kullanır; tek thread ölçüm için
+  `FLOWER_NUM_THREADS=1` ortam değişkeni verilebilir.
+
 ---
 
-## 4. Kişi — EfficientNetV2-S ve Performans Analizi
+## İrem Nur Yavuz — Genelleme ve Alternatif Model (CLIP)
+
+CLIP (`openai/clip-vit-base-patch32`) ile zero-shot/few-shot sınıflandırma,
+veri setinde olmayan türlerle genelleme testi, görüntü bozulmalarına
+dayanıklılık testi ve ana modellerle karşılaştırma.
+
+```bash
+# Tüm deneyleri çalıştır (clip.ipynb'nin zero-shot/few-shot adımları ayrıca çalıştırılmalı)
+jupyter nbconvert --to notebook --execute --inplace clip.ipynb
+
+# OOD / bozulma / karşılaştırma testleri
+python generalization_tests.py --task all
+```
+
+Sonuçlar `results/` altında: `clip_metrics.json`, `clip_few_shot_results.json`,
+`ood_results.json`, `corruption_robustness.json/png`, `comparison_table.csv`,
+`comparison_chart.png`, `GENERALIZATION_REPORT.md`.
+
+Diğer üyelerin `results/<model>_metrics.json` dosyalarını (aynı şema:
+`model_name`, `accuracy`, `inference_ms_per_image`, `model_size_mb`, `device`)
+eklemesiyle `--task compare` tam karşılaştırma tablosunu otomatik üretir.
+
+**Teslim doğrulama notu:** `requirements.txt`, sıfır bir sanal ortamda
+(`python3 -m venv` + `pip install -r requirements.txt`, Python 3.9.6) baştan
+test edildi. İki sorun bulunup düzeltildi: (1) `onnxruntime==1.31.1` PyPI'de
+hiç yayınlanmamış bir sürümdü, mevcut en güncel uyumlu sürüm olan `1.19.2`'ye
+düzeltildi; (2) conda ortamı aktifken `python3`'ün çok yeni/boş bir Python'a
+işaret edip kurulumu bozabileceği görüldü, bu kılavuza yukarıda eklendi.
+Düzeltmeden sonra tüm paketler (`torch`, `torchvision`, `transformers`,
+`onnxruntime`, `scikit-learn` vb.) temiz bir ortamda sorunsuz kuruldu ve
+import edildi.
+
+---
+
+## Zeynep Seray Uğur — EfficientNetV2-S ve Performans Analizi
 
 ImageNet ağırlıklı **EfficientNetV2-S** (`torchvision`), ortak `dataset.py` ile
 fine-tune edildi (gövde düşük LR, sınıflandırıcı 10× LR, AMP, label smoothing 0.1,

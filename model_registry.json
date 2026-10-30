@@ -9,6 +9,16 @@
         "class_mapping": "class_to_idx.json",
         "enabled": true
     },
+    "efficientnet_b0_pytorch": {
+        "architecture": "efficientnet_b0",
+        "backend": "pytorch",
+        "checkpoint": "checkpoints/efficientnet_b0_final.pth",
+        "num_classes": 102,
+        "image_size": 224,
+        "preprocessing": "imagenet_resize256_centercrop224",
+        "class_mapping": "class_to_idx.json",
+        "enabled": true
+    },
     "mobilenetv3_pytorch": {
         "architecture": "mobilenet_v3_large",
         "backend": "pytorch",

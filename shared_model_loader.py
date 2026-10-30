@@ -1,5 +1,6 @@
 from pathlib import Path
 import json
+import os
 
 import torch
 import torchvision.models as models
@@ -72,28 +73,41 @@ class SharedModel:
                 model.classifier[3].in_features,
                 self.num_classes
             )
+        elif self.architecture == "efficientnet_b0":
+            model = models.efficientnet_b0(weights=None)
+            model.classifier[1] = torch.nn.Linear(
+                model.classifier[1].in_features,
+                self.num_classes
+            )
         else:
             raise ValueError(
                 f"Unsupported architecture: {self.architecture}"
             )
 
-        state_dict = checkpoint.get(
-            "model_state_dict",
-            checkpoint.get("state_dict")
-        )
-
-        if state_dict is None:
-            raise ValueError("Checkpoint has no state dictionary.")
+        # Checkpoint ya {"model_state_dict": ..., "class_to_idx": ...} sözlüğü
+        # ya da düz bir state_dict olabilir (EfficientNet-B0 böyle kaydedildi).
+        if "model_state_dict" in checkpoint or "state_dict" in checkpoint:
+            state_dict = checkpoint.get(
+                "model_state_dict",
+                checkpoint.get("state_dict")
+            )
+        else:
+            state_dict = checkpoint
 
         checkpoint_arch = checkpoint.get("architecture")
 
         if checkpoint_arch and checkpoint_arch != self.architecture:
             raise ValueError("Checkpoint architecture mismatch.")
 
-        self.class_to_idx = {
-            str(k): int(v)
-            for k, v in checkpoint["class_to_idx"].items()
-        }
+        if "class_to_idx" in checkpoint:
+            self.class_to_idx = {
+                str(k): int(v)
+                for k, v in checkpoint["class_to_idx"].items()
+            }
+        else:
+            self.class_to_idx = load_class_mapping(
+                PROJECT_DIR / self.config["class_mapping"]
+            )
 
         if sorted(self.class_to_idx.values()) != list(
             range(self.num_classes)
@@ -107,8 +121,11 @@ class SharedModel:
         if self.device.type != "cpu":
             raise ValueError("ONNX deployment currently supports CPU only.")
 
+        # Varsayılan: ONNX Runtime tüm CPU çekirdeklerini kullanır (en hızlı).
+        # Tek thread ölçüm için: FLOWER_NUM_THREADS=1 ortam değişkeni.
         options = ort.SessionOptions()
-        options.intra_op_num_threads = 1
+        num_threads = int(os.environ.get("FLOWER_NUM_THREADS", "0"))
+        options.intra_op_num_threads = num_threads
         options.inter_op_num_threads = 1
 
         self.session = ort.InferenceSession(
