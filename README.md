@@ -109,4 +109,70 @@ Required files:
 Run inference:
 
 ```bash
-python predict.py --image path/to/flower.jpg --top-k 3
+python predict.py --image path/to/flower.jpg --top-k 3```
+
+---
+
+## 4. Kişi — EfficientNetV2-S ve Performans Analizi
+
+ImageNet ağırlıklı **EfficientNetV2-S** (`torchvision`), ortak `dataset.py` ile
+fine-tune edildi (gövde düşük LR, sınıflandırıcı 10× LR, AMP, label smoothing 0.1,
+OneCycle LR, early stopping). Tüm adımlar ve çıktılar `efficientnetv2.ipynb` içinde;
+metrik/puan fonksiyonları `metrics.py`'de.
+
+**Model dosyası:** [efficientnetv2_best.pth](https://drive.google.com/file/d/1Pxuz-DyhDthYKstTQ_-KiJXFqRAU5Svq/view?usp=sharing)
+(39.3 MB, fp16 ağırlıklar; checkpoint formatı MobileNetV3 ile aynı: `architecture`,
+`class_to_idx`, `model_state_dict`, `precision`). Preprocessing: Resize 256 →
+CenterCrop 224 → ImageNet mean/std. Sınıf sırası `dataset.py` ile aynı ("1"→0 … "102"→101).
+
+### Hyperparameter denemeleri (`results/efficientnetv2_hparams.csv`)
+
+| Learning rate | Batch size | Optimizer | Valid accuracy |
+|---|---|---|---|
+| **1e-3** | **32** | **AdamW** | **%99.39** |
+| 1e-3 | 64 | AdamW | %99.14 |
+| 1e-3 | 16 | AdamW | %98.90 |
+| 1e-3 | 32 | Adam | %98.78 |
+| 1e-4 | 32 | AdamW | %98.53 |
+| 3e-4 | 32 | AdamW | %98.53 |
+| 1e-2 | 32 | SGD | %98.29 |
+
+Her ayar 3 epoch eğitildi; en iyi ayarla final eğitim yapıldı (18. epoch'ta early stopping).
+
+### Test sonuçları (819 görüntü, `results/efficientnetv2_metrics.json`)
+
+| Metrik | Değer |
+|---|---|
+| Test accuracy | **%98.17** (15 hata) |
+| Top-5 accuracy | %100 |
+| Precision / Recall / F1 (macro) | 0.980 / 0.983 / 0.979 |
+| CPU inference (PyTorch, 1 thread, batch 1) | 119.6 ms/görüntü |
+| Model boyutu | 39.3 MB |
+| Tahmini yarışma puanı | **82.72** (accuracy 98.17, hız 41.8, boyut 89.1) |
+
+Grafikler: `efficientnetv2_training.png`, `efficientnetv2_confusion_matrix.png`,
+`efficientnetv2_errors.png`.
+
+### CPU süresi ve boyut dezavantajı
+
+EfficientNetV2-S ~20M parametreli büyük bir model. CPU'da **119.6 ms**, yani
+yarışma sınırının (Tmax = 50 ms) **2 katından fazla**; hız puanı 41.8'e düşüyor.
+Dosya **39.3 MB** ile Smax = 35 MB'ı aşıyor (boyut puanı 89.1). Fp16 kayıt boyutu
+yarıya indirdi (fp32 ~78 MB olurdu), ama yine de sınırın üstünde.
+
+Sonuç: accuracy yüksek olsa da (%98.17), **EfficientNet-B0 bu veri setinde hem daha
+doğru (%99.02) hem çok daha hızlı ve küçük**. Büyük model ek doğruluk sağlamıyor;
+EfficientNetV2-S bu yüzden final model değil, takımın üst-sınır referans modeli.
+
+**Çözünürlük denemesi** (`results/efficientnetv2_resolution.csv`): Aynı model 192 px
+girişle test edildiğinde accuracy %98.5'e çıktı, CPU süresi 87 ms'ye düştü ve puan
+**86.86** oldu. Daha düşük çözünürlük bu veri setinde doğruluğu düşürmeden hızı artırıyor.
+
+### Hata analizi
+
+- **En zor tür camellia** (recall 0.56): 9 görüntünün 4'ü yanlış (mallow ×2,
+  watercress, spring crocus). Renkleri ve yaprak formu çok çeşitli.
+- Hatalar çoğunlukla **renk + şekil benzerliğinden** (corn poppy → watercress,
+  californian poppy → buttercup) ve **alışılmadık açı/kadrajdan** (colt's foot → ball moss) kaynaklanıyor.
+- 15 hatanın 10'unda model güveni %60'ın altında; top-5 accuracy %100.
+- Train/valid eğrileri yakın, belirgin overfitting yok.
